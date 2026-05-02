@@ -118,4 +118,31 @@ public class ProductService {
             }
         }).toList();
     }
+
+    /**
+     * Filters products by price range.
+     *
+     * Retrieves all products where the price falls within the specified range.
+     *
+     * @param minPrice the minimum price (inclusive)
+     * @param maxPrice the maximum price (inclusive)
+     * @return list of products within the price range
+     * @throws IllegalArgumentException if minPrice or maxPrice is invalid
+     */
+    public List<Product> filterProductWithPrice(double minPrice, double maxPrice) {
+
+        if (minPrice < 0 || maxPrice < 0 || minPrice > maxPrice) {
+            throw new IllegalArgumentException("Invalid price range");
+        }
+
+        List<Product> filteredProducts = new ArrayList<>();
+
+        for (Product product : products) {
+            if (product.getPrice() >= minPrice && product.getPrice() <= maxPrice) {
+                filteredProducts.add(product);
+            }
+        }
+
+        return filteredProducts;
+    }
 }
