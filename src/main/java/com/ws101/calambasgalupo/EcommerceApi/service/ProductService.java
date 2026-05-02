@@ -1,93 +1,121 @@
 package com.ws101.calambasgalupo.EcommerceApi.service;
 
 import com.ws101.calambasgalupo.EcommerceApi.model.Product;
-import com.ws101.calambasgalupo.EcommerceApi.exception.ProductNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-/**
- * Service class for product operations.
- */
 @Service
 public class ProductService {
 
-    private final List<Product> productList = new ArrayList<>();
-    private final AtomicLong counter = new AtomicLong();
+    // In-memory storage (simulates a database)
+    private final List<Product> products = new ArrayList<>();
 
+    // Ensures unique IDs across all operations
+    private Long nextId = 1L;
+
+    /**
+     * Constructor - initializes sample data
+     */
     public ProductService() {
+        products.add(new Product(nextId++, "Classic Leather Bag", "brown leather", 499.0, "Bag", 10, "img1.jpg"));
+        products.add(new Product(nextId++, "Scarf Tote Bag", "scarf brown", 1999.0, "Bag", 8, "img2.jpg"));
+        products.add(new Product(nextId++, "Black Hand Bag", "scarf black", 1999.0, "Bag", 5, "img3.jpg"));
+        products.add(new Product(nextId++, "White Leather Bag", "white leather", 1999.0, "Bag", 15, "img4.jpg"));
+        products.add(new Product(nextId++, "Red Stiletto", "red", 2199.0, "Heels", 12, "img5.jpg"));
+        products.add(new Product(nextId++, "Black Heels", "black heels", 3499.0, "Heels", 20, "img6.jpg"));
+        products.add(new Product(nextId++, "Maroon Stiletto", "maroon", 2500.0, "Heels", 18, "img7.jpg"));
+        products.add(new Product(nextId++, "Ribbon Heels", "red ribbon", 1299.0, "Heels", 3, "img8.jpg"));
+        products.add(new Product(nextId++, "Red Dress", "red dress", 1299.0, "Dress", 25, "img9.jpg"));
+        products.add(new Product(nextId++, "Blush Dress", "sexy dress", 499.0, "Dress", 6, "img10.jpg"));
     }
 
+    // GET all products
     public List<Product> getAllProducts() {
-        return productList;
+        return products;
     }
 
+    // GET product by ID
     public Product getProductById(Long id) {
-        return productList.stream()
+        return products.stream()
                 .filter(p -> p.getId().equals(id))
                 .findFirst()
-                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+                .orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
-    public Product createProduct(Product product) {
-        product.setId(counter.incrementAndGet());
-        productList.add(product);
+    // CREATE new product
+    public Product addProduct(Product product) {
+        product.setId(nextId++);
+        products.add(product);
         return product;
     }
 
-    public Product updateProduct(Long id, Product updated) {
+    // UPDATE product (PUT - full replace)
+    public Product updateProduct(Long id, Product updatedProduct) {
         Product existing = getProductById(id);
 
-        existing.setName(updated.getName());
-        existing.setDescription(updated.getDescription());
-        existing.setPrice(updated.getPrice());
-        existing.setCategory(updated.getCategory());
-        existing.setStockQuantity(updated.getStockQuantity());
-        existing.setImageUrl(updated.getImageUrl());
+        existing.setName(updatedProduct.getName());
+        existing.setDescription(updatedProduct.getDescription());
+        existing.setPrice(updatedProduct.getPrice());
+        existing.setCategory(updatedProduct.getCategory());
+        existing.setStockQuantity(updatedProduct.getStockQuantity());
+        existing.setImageUrl(updatedProduct.getImageUrl());
 
         return existing;
     }
 
+    // PATCH product (partial update)
     public Product patchProduct(Long id, Map<String, Object> updates) {
         Product product = getProductById(id);
 
-        updates.forEach((key, value) -> {
-            switch (key) {
-                case "name" -> product.setName((String) value);
-                case "price" -> product.setPrice(Double.parseDouble(value.toString()));
-                case "category" -> product.setCategory((String) value);
-                case "stockQuantity" -> product.setStockQuantity((Integer) value);
-            }
-        });
+        if (updates.containsKey("name")) {
+            product.setName((String) updates.get("name"));
+        }
+
+        if (updates.containsKey("description")) {
+            product.setDescription((String) updates.get("description"));
+        }
+
+        if (updates.containsKey("price")) {
+            product.setPrice(((Number) updates.get("price")).doubleValue());
+        }
+
+        if (updates.containsKey("category")) {
+            product.setCategory((String) updates.get("category"));
+        }
+
+        if (updates.containsKey("stockQuantity")) {
+            product.setStockQuantity(((Number) updates.get("stockQuantity")).intValue());
+        }
+
+        if (updates.containsKey("imageUrl")) {
+            product.setImageUrl((String) updates.get("imageUrl"));
+        }
 
         return product;
     }
 
+    // DELETE product
     public void deleteProduct(Long id) {
         Product product = getProductById(id);
-        productList.remove(product);
+        products.remove(product);
     }
 
-    public List<Product> filter(String type, String value) {
-        return switch (type.toLowerCase()) {
-            case "name" -> productList.stream()
-                    .filter(p -> p.getName().toLowerCase().contains(value.toLowerCase()))
-                    .collect(Collectors.toList());
-
-            case "category" -> productList.stream()
-                    .filter(p -> p.getCategory().equalsIgnoreCase(value))
-                    .collect(Collectors.toList());
-
-            case "price" -> {
-                double price = Double.parseDouble(value);
-                yield productList.stream()
-                        .filter(p -> p.getPrice() == price)
-                        .collect(Collectors.toList());
+    // FILTER products (by name, category, price)
+    public List<Product> filterProducts(String filterType, String filterValue) {
+        return products.stream().filter(product -> {
+            switch (filterType.toLowerCase()) {
+                case "name":
+                    return product.getName().equalsIgnoreCase(filterValue);
+                case "category":
+                    return product.getCategory().equalsIgnoreCase(filterValue);
+                case "price":
+                    return product.getPrice() == Double.parseDouble(filterValue);
+                default:
+                    return false;
             }
-
-            default -> new ArrayList<>();
-        };
+        }).toList();
     }
 }

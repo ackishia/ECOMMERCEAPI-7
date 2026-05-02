@@ -19,48 +19,74 @@ public class ProductController {
         this.service = service;
     }
 
+    // GET ALL
     @GetMapping
     public ResponseEntity<List<Product>> getAll() {
         return ResponseEntity.ok(service.getAllProducts());
     }
 
+    // GET BY ID
     @GetMapping("/{id}")
     public ResponseEntity<Product> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(service.getProductById(id));
+        try {
+            return ResponseEntity.ok(service.getProductById(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
+    // FILTER
     @GetMapping("/filter")
     public ResponseEntity<List<Product>> filter(
             @RequestParam String filterType,
             @RequestParam String filterValue) {
 
-        return ResponseEntity.ok(service.filter(filterType, filterValue));
+        return ResponseEntity.ok(
+                service.filterProducts(filterType, filterValue) // ✅ FIXED
+        );
     }
 
+    // CREATE
     @PostMapping
     public ResponseEntity<Product> create(@RequestBody Product product) {
-        return ResponseEntity.status(201).body(service.createProduct(product));
+        return ResponseEntity.status(201)
+                .body(service.addProduct(product)); // ✅ FIXED
     }
 
+    // PUT (FULL UPDATE)
     @PutMapping("/{id}")
     public ResponseEntity<Product> update(
             @PathVariable Long id,
             @RequestBody Product product) {
 
-        return ResponseEntity.ok(service.updateProduct(id, product));
+        try {
+            return ResponseEntity.ok(service.updateProduct(id, product));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
+    // PATCH (PARTIAL UPDATE)
     @PatchMapping("/{id}")
     public ResponseEntity<Product> patch(
             @PathVariable Long id,
             @RequestBody Map<String, Object> updates) {
 
-        return ResponseEntity.ok(service.patchProduct(id, updates));
+        try {
+            return ResponseEntity.ok(service.patchProduct(id, updates));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
+    // DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        service.deleteProduct(id);
-        return ResponseEntity.noContent().build();
+        try {
+            service.deleteProduct(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
