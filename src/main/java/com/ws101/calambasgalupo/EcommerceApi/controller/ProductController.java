@@ -3,8 +3,10 @@ package com.ws101.calambasgalupo.EcommerceApi.controller;
 import com.ws101.calambasgalupo.EcommerceApi.model.Product;
 import com.ws101.calambasgalupo.EcommerceApi.service.ProductService;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
@@ -42,22 +44,23 @@ public class ProductController {
             @RequestParam String filterValue) {
 
         return ResponseEntity.ok(
-                service.filterProducts(filterType, filterValue) // ✅ FIXED
+                service.filterProducts(filterType, filterValue)
         );
     }
 
     // CREATE
     @PostMapping
-    public ResponseEntity<Product> create(@RequestBody Product product) {
-        return ResponseEntity.status(201)
-                .body(service.addProduct(product)); // ✅ FIXED
+    public ResponseEntity<Product> create(@Valid @RequestBody Product product) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(service.addProduct(product));
     }
 
     // PUT (FULL UPDATE)
     @PutMapping("/{id}")
     public ResponseEntity<Product> update(
             @PathVariable Long id,
-            @RequestBody Product product) {
+            @Valid @RequestBody Product product) {
 
         try {
             return ResponseEntity.ok(service.updateProduct(id, product));
