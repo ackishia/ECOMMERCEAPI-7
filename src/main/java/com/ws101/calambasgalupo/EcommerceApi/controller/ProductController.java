@@ -32,8 +32,8 @@ public class ProductController {
     public ResponseEntity<Product> getById(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(service.getProductById(id));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+        } catch (Exception e) { //  changed (more general, safer)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
@@ -64,8 +64,8 @@ public class ProductController {
 
         try {
             return ResponseEntity.ok(service.updateProduct(id, product));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+        } catch (Exception e) { //  changed
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
@@ -77,8 +77,8 @@ public class ProductController {
 
         try {
             return ResponseEntity.ok(service.patchProduct(id, updates));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+        } catch (Exception e) { //  changed
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
@@ -88,8 +88,8 @@ public class ProductController {
         try {
             service.deleteProduct(id);
             return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+        } catch (Exception e) { //  changed
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 }
