@@ -15,7 +15,7 @@ import java.util.Map;
  * REST Controller for handling product-related API requests.
  * Provides endpoints for CRUD operations and filtering products.
  *
- *  @author Jackielyn & Chris
+ * @author Jackielyn & Chris
  */
 @RestController
 @RequestMapping("/api/v1/products")
@@ -23,28 +23,17 @@ public class ProductController {
 
     private final ProductService service;
 
-    /**
-     * Constructor for ProductController.
-     * @param service ProductService instance
-     */
     public ProductController(ProductService service) {
         this.service = service;
     }
 
-    /**
-     * Retrieves all products.
-     * @return list of all products
-     */
+    // ===================== GET =====================
+
     @GetMapping
     public ResponseEntity<List<Product>> getAll() {
         return ResponseEntity.ok(service.getAllProducts());
     }
 
-    /**
-     * Retrieves a single product by its ID.
-     * @param id product ID
-     * @return product if found, otherwise 404
-     */
     @GetMapping("/{id}")
     public ResponseEntity<Product> getById(@PathVariable Long id) {
         try {
@@ -54,12 +43,8 @@ public class ProductController {
         }
     }
 
-    /**
-     * Filters products based on type and value.
-     * @param filterType criteria (e.g., name, category, price)
-     * @param filterValue value to filter by
-     * @return list of filtered products
-     */
+    // ===================== FILTER =====================
+
     @GetMapping("/filter")
     public ResponseEntity<List<Product>> filter(
             @RequestParam String filterType,
@@ -70,42 +55,40 @@ public class ProductController {
         );
     }
 
-    /**
-     * Creates a new product.
-     * @param product product data from request body
-     * @return created product with status 201
-     */
+    // ===================== CREATE =====================
+
     @PostMapping
     public ResponseEntity<Product> create(@Valid @RequestBody Product product) {
+
+        if (product.getCategory() == null || product.getCategory().getId() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(service.addProduct(product));
     }
 
-    /**
-     * Updates an existing product completely.
-     * @param id product ID
-     * @param product updated product data
-     * @return updated product or 404 if not found
-     */
+    // ===================== UPDATE (PUT) =====================
+
     @PutMapping("/{id}")
     public ResponseEntity<Product> update(
             @PathVariable Long id,
             @Valid @RequestBody Product product) {
 
         try {
+            if (product.getCategory() == null || product.getCategory().getId() == null) {
+                return ResponseEntity.badRequest().build();
+            }
+
             return ResponseEntity.ok(service.updateProduct(id, product));
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
-    /**
-     * Partially updates a product.
-     * @param id product ID
-     * @param updates map of fields to update
-     * @return updated product or 404 if not found
-     */
+    // ===================== PATCH =====================
+
     @PatchMapping("/{id}")
     public ResponseEntity<Product> patch(
             @PathVariable Long id,
@@ -118,11 +101,8 @@ public class ProductController {
         }
     }
 
-    /**
-     * Deletes a product by ID.
-     * @param id product ID
-     * @return 204 if deleted, 404 if not found
-     */
+    // ===================== DELETE =====================
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         try {
