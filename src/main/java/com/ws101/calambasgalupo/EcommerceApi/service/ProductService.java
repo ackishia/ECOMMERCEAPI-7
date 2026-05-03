@@ -1,5 +1,6 @@
 package com.ws101.calambasgalupo.EcommerceApi.service;
 
+import com.ws101.calambasgalupo.EcommerceApi.model.Category;
 import com.ws101.calambasgalupo.EcommerceApi.model.Product;
 import org.springframework.stereotype.Service;
 
@@ -10,34 +11,46 @@ import java.util.Map;
 @Service
 public class ProductService {
 
-    // In-memory storage (simulates a database)
     private final List<Product> products = new ArrayList<>();
-
-    // Ensures unique IDs across all operations
     private Long nextId = 1L;
 
     /**
      * Constructor - initializes sample data
      */
     public ProductService() {
-        products.add(new Product(nextId++, "Classic Leather Bag", "brown leather", 499.0, "Bag", 10, "img1.jpg"));
-        products.add(new Product(nextId++, "Scarf Tote Bag", "scarf brown", 1999.0, "Bag", 8, "img2.jpg"));
-        products.add(new Product(nextId++, "Black Hand Bag", "scarf black", 1999.0, "Bag", 5, "img3.jpg"));
-        products.add(new Product(nextId++, "White Leather Bag", "white leather", 1999.0, "Bag", 15, "img4.jpg"));
-        products.add(new Product(nextId++, "Red Stiletto", "red", 2199.0, "Heels", 12, "img5.jpg"));
-        products.add(new Product(nextId++, "Black Heels", "black heels", 3499.0, "Heels", 20, "img6.jpg"));
-        products.add(new Product(nextId++, "Maroon Stiletto", "maroon", 2500.0, "Heels", 18, "img7.jpg"));
-        products.add(new Product(nextId++, "Ribbon Heels", "red ribbon", 1299.0, "Heels", 3, "img8.jpg"));
-        products.add(new Product(nextId++, "Red Dress", "red dress", 1299.0, "Dress", 25, "img9.jpg"));
-        products.add(new Product(nextId++, "Blush Dress", "sexy dress", 499.0, "Dress", 6, "img10.jpg"));
+
+        // Create categories
+        Category bag = new Category();
+        bag.setId(1L);
+        bag.setName("Bag");
+
+        Category heels = new Category();
+        heels.setId(2L);
+        heels.setName("Heels");
+
+        Category dress = new Category();
+        dress.setId(3L);
+        dress.setName("Dress");
+
+        // Add products
+        products.add(new Product(nextId++, "Classic Leather Bag", "brown leather", 499.0, bag, 10, "img1.jpg"));
+        products.add(new Product(nextId++, "Scarf Tote Bag", "scarf brown", 1999.0, bag, 8, "img2.jpg"));
+        products.add(new Product(nextId++, "Black Hand Bag", "scarf black", 1999.0, bag, 5, "img3.jpg"));
+        products.add(new Product(nextId++, "White Leather Bag", "white leather", 1999.0, bag, 15, "img4.jpg"));
+
+        products.add(new Product(nextId++, "Red Stiletto", "red", 2199.0, heels, 12, "img5.jpg"));
+        products.add(new Product(nextId++, "Black Heels", "black heels", 3499.0, heels, 20, "img6.jpg"));
+        products.add(new Product(nextId++, "Maroon Stiletto", "maroon", 2500.0, heels, 18, "img7.jpg"));
+        products.add(new Product(nextId++, "Ribbon Heels", "red ribbon", 1299.0, heels, 3, "img8.jpg"));
+
+        products.add(new Product(nextId++, "Red Dress", "red dress", 1299.0, dress, 25, "img9.jpg"));
+        products.add(new Product(nextId++, "Blush Dress", "sexy dress", 499.0, dress, 6, "img10.jpg"));
     }
 
-    // GET all products
     public List<Product> getAllProducts() {
         return products;
     }
 
-    // GET product by ID
     public Product getProductById(Long id) {
         return products.stream()
                 .filter(p -> p.getId().equals(id))
@@ -45,28 +58,25 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
-    // CREATE new product
     public Product addProduct(Product product) {
         product.setId(nextId++);
         products.add(product);
         return product;
     }
 
-    // UPDATE product (PUT - full replace)
     public Product updateProduct(Long id, Product updatedProduct) {
         Product existing = getProductById(id);
 
         existing.setName(updatedProduct.getName());
         existing.setDescription(updatedProduct.getDescription());
         existing.setPrice(updatedProduct.getPrice());
-        existing.setCategory(updatedProduct.getCategory());
+        existing.setCategory(updatedProduct.getCategory()); // already correct
         existing.setStockQuantity(updatedProduct.getStockQuantity());
         existing.setImageUrl(updatedProduct.getImageUrl());
 
         return existing;
     }
 
-    // PATCH product (partial update)
     public Product patchProduct(Long id, Map<String, Object> updates) {
         Product product = getProductById(id);
 
@@ -83,7 +93,9 @@ public class ProductService {
         }
 
         if (updates.containsKey("category")) {
-            product.setCategory((String) updates.get("category"));
+            Category category = new Category();
+            category.setName((String) updates.get("category"));
+            product.setCategory(category); //  FIXED
         }
 
         if (updates.containsKey("stockQuantity")) {
@@ -97,20 +109,18 @@ public class ProductService {
         return product;
     }
 
-    // DELETE product
     public void deleteProduct(Long id) {
         Product product = getProductById(id);
         products.remove(product);
     }
 
-    // FILTER products (by name, category, price)
     public List<Product> filterProducts(String filterType, String filterValue) {
         return products.stream().filter(product -> {
             switch (filterType.toLowerCase()) {
                 case "name":
                     return product.getName().equalsIgnoreCase(filterValue);
                 case "category":
-                    return product.getCategory().equalsIgnoreCase(filterValue);
+                    return product.getCategory().getName().equalsIgnoreCase(filterValue); //  FIXED
                 case "price":
                     return product.getPrice() == Double.parseDouble(filterValue);
                 default:
@@ -119,16 +129,6 @@ public class ProductService {
         }).toList();
     }
 
-    /**
-     * Filters products by price range.
-     *
-     * Retrieves all products where the price falls within the specified range.
-     *
-     * @param minPrice the minimum price (inclusive)
-     * @param maxPrice the maximum price (inclusive)
-     * @return list of products within the price range
-     * @throws IllegalArgumentException if minPrice or maxPrice is invalid
-     */
     public List<Product> filterProductWithPrice(double minPrice, double maxPrice) {
 
         if (minPrice < 0 || maxPrice < 0 || minPrice > maxPrice) {
