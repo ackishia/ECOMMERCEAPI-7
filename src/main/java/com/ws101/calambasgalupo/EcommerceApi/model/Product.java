@@ -1,5 +1,6 @@
 package com.ws101.calambasgalupo.EcommerceApi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,13 +30,14 @@ public class Product {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Category category;
 
     // REQUIRED by JPA
     public Product() {
     }
 
-    // Updated constructor (IMPORTANT)
+    // Constructor
     public Product(Long id, String name, String description, double price,
                    Category category, int stockQuantity, String imageUrl) {
         this.id = id;

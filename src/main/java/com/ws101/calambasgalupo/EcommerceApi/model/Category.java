@@ -1,5 +1,6 @@
 package com.ws101.calambasgalupo.EcommerceApi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,5 +28,6 @@ public class Category {
      * mappedBy refers to the field "category" in Product class
      */
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore //  THIS FIXES PROBLEM
     private List<Product> products;
 }
