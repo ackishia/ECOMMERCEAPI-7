@@ -11,12 +11,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
-/**
- * REST Controller for handling product-related API requests.
- * Provides endpoints for CRUD operations and filtering products.
- *
- * @author Jackielyn & Chris
- */
 @RestController
 @RequestMapping("/api/v1/products")
 public class ProductController {
@@ -55,6 +49,17 @@ public class ProductController {
         );
     }
 
+    // PRICE RANGE
+    @GetMapping("/price-range")
+    public ResponseEntity<List<Product>> filterByPriceRange(
+            @RequestParam double minPrice,
+            @RequestParam double maxPrice) {
+
+        return ResponseEntity.ok(
+                service.filterProductWithPrice(minPrice, maxPrice)
+        );
+    }
+
     // ===================== CREATE =====================
 
     @PostMapping
@@ -64,12 +69,11 @@ public class ProductController {
             return ResponseEntity.badRequest().build();
         }
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .body(service.addProduct(product));
     }
 
-    // ===================== UPDATE (PUT) =====================
+    // ===================== UPDATE =====================
 
     @PutMapping("/{id}")
     public ResponseEntity<Product> update(

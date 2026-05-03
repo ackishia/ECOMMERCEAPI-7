@@ -20,18 +20,19 @@ public class ProductService {
         this.categoryRepo = categoryRepo;
     }
 
-    // GET all products
+    // ===================== GET =====================
+
     public List<Product> getAllProducts() {
         return repo.findAll();
     }
 
-    // GET by ID
     public Product getProductById(Long id) {
         return repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
-    // CREATE
+    // ===================== CREATE =====================
+
     public Product addProduct(Product product) {
         if (product.getCategory() != null && product.getCategory().getId() != null) {
             Category category = categoryRepo.findById(product.getCategory().getId())
@@ -41,7 +42,8 @@ public class ProductService {
         return repo.save(product);
     }
 
-    // UPDATE (PUT)
+    // ===================== UPDATE =====================
+
     public Product updateProduct(Long id, Product updatedProduct) {
         Product existing = getProductById(id);
 
@@ -61,7 +63,8 @@ public class ProductService {
         return repo.save(existing);
     }
 
-    // PATCH
+    // ===================== PATCH =====================
+
     public Product patchProduct(Long id, Map<String, Object> updates) {
         Product product = getProductById(id);
 
@@ -98,40 +101,54 @@ public class ProductService {
         return repo.save(product);
     }
 
-    // DELETE
+    // ===================== DELETE =====================
+
     public void deleteProduct(Long id) {
+        if (!repo.existsById(id)) {
+            throw new RuntimeException("Product not found");
+        }
         repo.deleteById(id);
     }
 
-    // FILTER
+    // ===================== FILTER =====================
+
     public List<Product> filterProducts(String filterType, String filterValue) {
 
         switch (filterType.toLowerCase()) {
+
             case "name":
                 return repo.findAll().stream()
-                        .filter(p -> p.getName().equalsIgnoreCase(filterValue))
+                        .filter(p -> p.getName() != null &&
+                                p.getName().equalsIgnoreCase(filterValue))
                         .toList();
 
             case "category":
                 return repo.findByCategoryName(filterValue);
 
             case "price":
-                return repo.findAll().stream()
-                        .filter(p -> p.getPrice() == Double.parseDouble(filterValue))
-                        .toList();
+                try {
+                    double price = Double.parseDouble(filterValue);
+                    return repo.findAll().stream()
+                            .filter(p -> p.getPrice() == price)
+                            .toList();
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid price value");
+                }
 
             default:
                 return List.of();
         }
     }
 
-    // FILTER by price range
+    // ===================== PRICE RANGE (FIXED) =====================
+
     public List<Product> filterProductWithPrice(double minPrice, double maxPrice) {
 
         if (minPrice < 0 || maxPrice < 0 || minPrice > maxPrice) {
             throw new IllegalArgumentException("Invalid price range");
         }
 
+        // match repository
         return repo.findByPriceRange(minPrice, maxPrice);
     }
 }
