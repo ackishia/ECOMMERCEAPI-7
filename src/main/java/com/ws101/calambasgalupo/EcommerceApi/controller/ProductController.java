@@ -30,11 +30,7 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Product> getById(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(service.getProductById(id));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(service.getProductById(id));
     }
 
     // ===================== FILTER =====================
@@ -49,7 +45,8 @@ public class ProductController {
         );
     }
 
-    // PRICE RANGE
+    // ===================== PRICE RANGE =====================
+
     @GetMapping("/price-range")
     public ResponseEntity<List<Product>> filterByPriceRange(
             @RequestParam double minPrice,
@@ -66,7 +63,7 @@ public class ProductController {
     public ResponseEntity<Product> create(@Valid @RequestBody Product product) {
 
         if (product.getCategory() == null || product.getCategory().getId() == null) {
-            return ResponseEntity.badRequest().build();
+            throw new IllegalArgumentException("Category ID is required");
         }
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -80,15 +77,11 @@ public class ProductController {
             @PathVariable Long id,
             @Valid @RequestBody Product product) {
 
-        try {
-            if (product.getCategory() == null || product.getCategory().getId() == null) {
-                return ResponseEntity.badRequest().build();
-            }
-
-            return ResponseEntity.ok(service.updateProduct(id, product));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+        if (product.getCategory() == null || product.getCategory().getId() == null) {
+            throw new IllegalArgumentException("Category ID is required");
         }
+
+        return ResponseEntity.ok(service.updateProduct(id, product));
     }
 
     // ===================== PATCH =====================
@@ -98,22 +91,14 @@ public class ProductController {
             @PathVariable Long id,
             @RequestBody Map<String, Object> updates) {
 
-        try {
-            return ResponseEntity.ok(service.patchProduct(id, updates));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(service.patchProduct(id, updates));
     }
 
     // ===================== DELETE =====================
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        try {
-            service.deleteProduct(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        service.deleteProduct(id);
+        return ResponseEntity.noContent().build();
     }
 }
