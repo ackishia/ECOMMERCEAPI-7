@@ -36,20 +36,44 @@ public class SecurityConfig {
         return provider;
     }
 
-    // Security Filter Chain
+    // Security Filter Chain - FINAL FIXED VERSION
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // fully disable CSRF
+                // Disable CSRF for easier API testing
                 .csrf(csrf -> csrf.disable())
 
-                // allow everything (for now - for testing)
+                // Configure authorization rules
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
+                        .requestMatchers(
+                                "/api/v1/auth/register",
+                                "/login",
+                                "/logout",
+                                "/error"
+                        ).permitAll()
+                        .anyRequest().authenticated()
                 )
 
-                // disable login + basic auth
-                .formLogin(form -> form.disable())
+                // Configure form-based login
+                // Key fix: Use loginProcessingUrl to handle POST, avoid loginPage() loop
+                .formLogin(form -> form
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/", true)
+                        .failureUrl("/login?error=true")
+                        .permitAll()
+                )
+
+                // Configure logout
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout=true")
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
+                )
+
+                // Disable HTTP Basic
                 .httpBasic(httpBasic -> httpBasic.disable());
 
         return http.build();

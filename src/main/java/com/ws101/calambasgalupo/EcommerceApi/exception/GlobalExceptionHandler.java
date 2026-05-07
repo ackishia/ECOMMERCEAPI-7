@@ -1,4 +1,4 @@
-package com.ws101.calambasgalupo.EcommerceApi.exception; // ✅ Correct package name
+package com.ws101.calambasgalupo.EcommerceApi.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.HashMap;
 import java.util.Map;
 
-@ControllerAdvice // ✅ Correct annotation for global exception handling
+@ControllerAdvice // annotation for global exception handling
 public class GlobalExceptionHandler {
 
-    // ✅ Handle validation errors (from @Valid in controllers)
+    //  Handle validation errors (from @Valid in controllers)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -26,13 +26,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-    // ✅ Handle access denied errors (protected endpoints without login)
+    // Handle access denied errors (protected endpoints without login)
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException ex) {
         return new ResponseEntity<>("Access denied! Please log in first.", HttpStatus.FORBIDDEN);
     }
 
-    // ✅ Handle general runtime errors
+    //  Handle general runtime errors
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
         Map<String, String> error = new HashMap<>();
@@ -40,5 +40,5 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
-} // ✅ Missing closing bracket added
+}
 
