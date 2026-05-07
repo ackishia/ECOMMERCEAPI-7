@@ -13,7 +13,7 @@ import java.util.Map;
 
 @CrossOrigin(origins = "http://127.0.0.1:5500")
 @RestController
-@RequestMapping("/api/v1/products")
+@RequestMapping("/api/v1/products") //  FIXED PATH
 public class ProductController {
 
     private final ProductService service;
