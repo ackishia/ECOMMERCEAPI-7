@@ -7,12 +7,14 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity; // <--- IMPORT
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity // <--- ADD THIS LINE HERE
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
@@ -36,7 +38,7 @@ public class SecurityConfig {
         return provider;
     }
 
-    // Security Filter Chain - FINAL FIXED VERSION
+    // Security Filter Chain
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -55,7 +57,6 @@ public class SecurityConfig {
                 )
 
                 // Configure form-based login
-                // Key fix: Use loginProcessingUrl to handle POST, avoid loginPage() loop
                 .formLogin(form -> form
                         .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/", true)
@@ -79,3 +80,4 @@ public class SecurityConfig {
         return http.build();
     }
 }
+

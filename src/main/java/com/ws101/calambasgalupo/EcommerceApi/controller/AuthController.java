@@ -4,6 +4,7 @@ import com.ws101.calambasgalupo.EcommerceApi.model.User;
 import com.ws101.calambasgalupo.EcommerceApi.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize; // Added import
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,6 +19,7 @@ public class AuthController {
     }
 
     // @Valid triggers validation BEFORE data reaches the service layer
+    // PUBLIC ENDPOINT: No @PreAuthorize needed = Accessible to everyone
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@Valid @RequestBody User user) {
         userService.registerUser(user);
@@ -25,4 +27,3 @@ public class AuthController {
     }
 
 }
-

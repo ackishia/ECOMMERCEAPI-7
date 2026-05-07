@@ -1,6 +1,7 @@
 package com.ws101.calambasgalupo.EcommerceApi.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -10,6 +11,8 @@ import java.util.Map;
 @RequestMapping("/api/v1/orders")
 public class OrderController {
 
+    // User-specific endpoint: Requires authentication
+    @PreAuthorize("isAuthenticated()")
     @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody Map<String, Object> request) {
 
@@ -31,3 +34,4 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 }
+
