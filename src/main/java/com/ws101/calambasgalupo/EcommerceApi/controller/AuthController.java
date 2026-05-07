@@ -1,10 +1,9 @@
 package com.ws101.calambasgalupo.EcommerceApi.controller;
-
-import com.ws101.calambasgalupo.EcommerceApi.model.User;
+import com.ws101.calambasgalupo.EcommerceApi.dto.RegisterUserDto; // Import your DTO
 import com.ws101.calambasgalupo.EcommerceApi.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize; // Added import
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,8 +20,8 @@ public class AuthController {
     // @Valid triggers validation BEFORE data reaches the service layer
     // PUBLIC ENDPOINT: No @PreAuthorize needed = Accessible to everyone
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@Valid @RequestBody User user) {
-        userService.registerUser(user);
+    public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterUserDto dto) {
+        userService.registerUser(dto);
         return ResponseEntity.ok("User registered successfully!");
     }
 

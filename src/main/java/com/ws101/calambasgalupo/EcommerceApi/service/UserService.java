@@ -1,34 +1,38 @@
 package com.ws101.calambasgalupo.EcommerceApi.service;
 
-import com.ws101.calambasgalupo.EcommerceApi.model.User;       // Import your User model
-import com.ws101.calambasgalupo.EcommerceApi.repository.UserRepository; // Import your User Repository
-import org.springframework.security.crypto.password.PasswordEncoder; // Import Password Encoder
-import org.springframework.stereotype.Service; // Marks this class as a Spring Service
+import com.ws101.calambasgalupo.EcommerceApi.dto.RegisterUserDto; // Import your DTO
+import com.ws101.calambasgalupo.EcommerceApi.model.User;
+import com.ws101.calambasgalupo.EcommerceApi.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
-@Service // Tells Spring to manage this class as a bean
+@Service
 public class UserService {
 
-    // Inject dependencies using constructor injection (best practice)
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // Constructor - Spring will automatically provide these objects
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    /**
-     * Register a new user:
-     * 1. Encode the password (hash it) before saving to database
-     * 2. Save the user data using UserRepository
-     */
-    public User registerUser(User user) {
-        // ✅ Encode the plain password into a secure hash
+    // Changed parameter from User to RegisterUserDto
+    public User registerUser(RegisterUserDto dto) {
+
+        // 1. Create a new User object (Entity)
+        User user = new User();
+
+        // 2. Copy data from DTO to Entity
+        user.setUsername(dto.username());
+        user.setPassword(dto.password());
+        user.setRole(dto.role()); // kung may role ka sa DTO
+
+        // 3. Encode the password
         String hashedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(hashedPassword);
 
-        // ✅ Save the user to the database
+        // 4. Save to database
         return userRepository.save(user);
     }
 }
