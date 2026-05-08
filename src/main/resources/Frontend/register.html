@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+</head>
+<body>
+
+<h2>Register</h2>
+
+<form onsubmit="registerUser(event)">
+
+    <div>
+        <label>Username:</label>
+        <input type="text" id="username" required>
+    </div>
+
+    <br>
+
+    <div>
+        <label>Password:</label>
+        <input type="password" id="password" required>
+    </div>
+
+    <br>
+
+    <div>
+        <label>Role:</label>
+        <select id="role">
+            <option value="USER">USER</option>
+            <option value="ADMIN">ADMIN</option>
+        </select>
+    </div>
+
+    <br>
+
+    <button type="submit">Register</button>
+
+</form>
+
+<p id="msg"></p>
+
+<script>
+    async function registerUser(event) {
+        event.preventDefault();
+
+        const data = {
+            username: document.getElementById("username").value,
+            password: document.getElementById("password").value,
+            role: document.getElementById("role").value
+        };
+
+        const response = await fetch("/api/v1/auth/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            document.getElementById("msg").innerText = "Registration successful!";
+            setTimeout(() => {
+                window.location.href = "login.html";
+            }, 1500);
+        } else {
+            const error = await response.text();
+            document.getElementById("msg").innerText = error;
+        }
+    }
+</script>
+
+</body>
+</html>

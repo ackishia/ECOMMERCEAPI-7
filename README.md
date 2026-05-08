@@ -297,6 +297,96 @@ async function fetchProducts() {
 * Chris F. Galupo
 
 
+# Ecommerce API – Security Documentation
+# Lab 9
+
+# Security Architecture
+
+This project uses **Session-Based Authentication (Spring Security)**.
+
+When a user logs in:
+- The server authenticates credentials
+- A session is created on the server
+- A JSESSIONID cookie is sent to the client
+- The browser/Postman stores this cookie automatically
+- Every request uses this cookie for authentication
+
+### Flow:
+1. User logs in
+2. Server creates session
+3. Client receives JSESSIONID cookie
+4. Cookie is sent automatically on each request
+5. Server validates session for protected endpoints
+
+---
+
+#Validation Rules
+
+### User Entity:
+- username: required, unique
+- password: required, minimum 4 characters
+- role: must be USER or ADMIN
+
+### Product Entity:
+- name: required
+- price: must be greater than 0
+- stockQuantity: must not be negative
+
+Validation errors return user-friendly messages.
+
+
+#  API Reference
+
+## Authentication
+
+### Register
+POST /api/v1/auth/register  
+![REGISTER-7.png](LAB9SS/REGISTER-7.png)
+![USERREGISTERED.png](LAB9SS/USERREGISTERED.png)
+![INVALIDREGISTERTASK2.png](LAB9SS/INVALIDREGISTERTASK2.png)
+
+### Login
+POST /login  
+![LOGIN-TASK1(1).png](LAB9SS/LOGIN-TASK1%281%29.png)
+![LOGIN-TASK1.png](LAB9SS/LOGIN-TASK1.png)
+
+### Logout
+POST /logout  
+![LOGOUTSUCCESSFUL(TASK2).png](LAB9SS/LOGOUTSUCCESSFUL%28TASK2%29.png)
+
+---
+
+## Products
+
+### Get Products
+GET /api/products  
+![GETPRODUCTSWOLOGIN-1.png](LAB9SS/GETPRODUCTSWOLOGIN-1.png)
+![GETPRODUCTWOLOGIN-2.png](LAB9SS/GETPRODUCTWOLOGIN-2.png)
+
+---
+
+## Admin Only
+
+# Browser Console
+![BROWSERCONSOLE-8.png](LAB9SS/BROWSERCONSOLE-8.png)
+
+# Testing In Postman
+![TESTINGINPOSTMAN(MYSQL).png](LAB9SS/TESTINGINPOSTMAN%28MYSQL%29.png)
+![TESTINGINPOSTMAN4OOBADREQ.png](LAB9SS/TESTINGINPOSTMAN4OOBADREQ.png)
+![TESTINGINPOSTMAN-7.png](LAB9SS/TESTINGINPOSTMAN-7.png)
+![TESTINGINPOSTMANDTORESPONSE.png](LAB9SS/TESTINGINPOSTMANDTORESPONSE.png)
+![TESTINGINPOSTMANTASK5(POST).png](LAB9SS/TESTINGINPOSTMANTASK5%28POST%29.png)
+
+# Updated in Postman
+![UPDATEDINPOSTAMNNOAUTH.png](LAB9SS/UPDATEDINPOSTAMNNOAUTH.png)
+![UPDATEDPRODUCTINPOSTMAN201CREATED-9.png](LAB9SS/UPDATEDPRODUCTINPOSTMAN201CREATED-9.png)
+![UpdatedProductstestinpostman-6.png](LAB9SS/UpdatedProductstestinpostman-6.png)
+
+#  Security Behavior
+
+- Unauthenticated users receive **401 Unauthorized**
+- Authenticated users without proper role receive **403 Forbidden**
+- Protected endpoints require valid session (JSESSIONID)
 
 
 

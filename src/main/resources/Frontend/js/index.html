@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home - Ecommerce</title>
+</head>
+<body>
+
+<h1>Welcome to Ecommerce System</h1>
+
+<p id="status">Checking authentication...</p>
+
+<button onclick="logout()">Logout</button>
+
+<script>
+    //  Check if user is logged in (session-based)
+    async function checkAuth() {
+        try {
+            const response = await fetch("/api/products", {
+                method: "GET",
+                credentials: "include" // IMPORTANT for session cookies
+            });
+
+            if (response.status === 401) {
+                document.getElementById("status").innerText = "Not logged in";
+                window.location.href = "login.html";
+            } else {
+                document.getElementById("status").innerText = "Logged in successfully";
+            }
+
+        } catch (error) {
+            console.log(error);
+            window.location.href = "login.html";
+        }
+    }
+
+    async function logout() {
+        await fetch("/logout", {
+            method: "POST",
+            credentials: "include"
+        });
+
+        window.location.href = "login.html";
+    }
+
+    checkAuth();
+</script>
+
+</body>
+</html>
