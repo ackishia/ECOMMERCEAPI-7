@@ -2,87 +2,79 @@ package com.ws101.calambasgalupo.EcommerceApi.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import org.springframework.http.HttpMethod;
-
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-
 @Configuration
-@EnableMethodSecurity
 public class SecurityConfig {
 
-    // ================= PASSWORD ENCODER =================
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    // ================= TEST USER =================
-    @Bean
-    public UserDetailsService userDetailsService() {
-
-        UserDetails user = User.builder()
-                .username("admin")
-                .password(passwordEncoder().encode("1234"))
-                .roles("USER")
-                .build();
-
-        return new InMemoryUserDetailsManager(user);
-    }
-
-    // ================= SECURITY =================
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
+                //  Disable CSRF
+                .csrf(csrf -> csrf.disable())
 
-                // ================= CSRF =================
-                .csrf(csrf -> csrf
-                        .csrfTokenRepository(
-                                CookieCsrfTokenRepository.withHttpOnlyFalse()
-                        )
-                )
-
-                // ================= AUTHORIZATION =================
+                //  AUTH RULES
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/login").permitAll()
+                        //  PUBLIC ENDPOINTS (FIXED)
+                        .requestMatchers(
+                                "/login",
+                                "/register",
+                                "/api/v1/auth/register",
+                                "/api/v1/auth/login",
+                                "/css/**",
+                                "/js/**"
+                        ).permitAll()
 
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        // USER ACCESS
+                        .requestMatchers("/api/products/**").authenticated()
 
-                        .requestMatchers(HttpMethod.POST, "/api/v1/products/**").permitAll()
+                        // ADMIN ONLY
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
+                        // EVERYTHING ELSE
                         .anyRequest().authenticated()
                 )
 
-                // ================= FORM LOGIN =================
+                //  FORM LOGIN (for browser login page)
                 .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/index.html", true)
+                        .failureUrl("/login?error=true")
                         .permitAll()
                 )
 
-                // ================= LOGOUT =================
+                // LOGOUT
                 .logout(logout -> logout
                         .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout=true")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
-                        .permitAll()
+                )
+
+                //  401 / 403 HANDLING
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((req, res, authEx) -> {
+                            res.setStatus(401);
+                            res.getWriter().write("Unauthorized - Please login");
+                        })
+                        .accessDeniedHandler((req, res, accessDeniedEx) -> {
+                            res.setStatus(403);
+                            res.getWriter().write("Forbidden - Access denied");
+                        })
                 );
 
         return http.build();
+    }
+
+    // REQUIRED FOR PASSWORD ENCODING
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

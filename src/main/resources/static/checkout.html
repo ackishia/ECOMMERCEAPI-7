@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Checkout</title>
+</head>
+<body>
+
+<h1>Checkout Page</h1>
+
+<p>User is authenticated.</p>
+
+<script src="api.js"></script>
+
+<script>
+    async function checkAuth() {
+
+        const response = await apiFetch("/api/v1/auth/me");
+
+        if (!response) {
+            return;
+        }
+
+        const user = await response.json();
+
+        console.log("Logged in user:", user);
+    }
+
+    checkAuth();
+</script>
+
+</body>
+</html>

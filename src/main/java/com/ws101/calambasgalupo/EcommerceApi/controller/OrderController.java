@@ -13,7 +13,7 @@ public class OrderController {
 
     // User-specific endpoint: Requires authentication
     @PreAuthorize("isAuthenticated()")
-    @PostMapping
+    @PostMapping("/api/v1/auth/register")
     public ResponseEntity<?> createOrder(@RequestBody Map<String, Object> request) {
 
         // simulate extracting values

@@ -16,7 +16,7 @@ public class AuthController {
         this.userService = userService;
     }
 
-    @PostMapping("/register")
+    @PostMapping("/api/v1/auth/register")
     public ResponseEntity<String> registerUser(
             @Valid @RequestBody RegisterUserDto dto) {
 

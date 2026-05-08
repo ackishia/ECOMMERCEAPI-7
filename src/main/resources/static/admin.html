@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Page</title>
+</head>
+<body>
+
+<h1>Admin Dashboard</h1>
+
+<p>Only ADMIN users can access this page.</p>
+
+<script src="api.js"></script>
+
+<script>
+    async function checkAdmin() {
+
+        const response = await apiFetch("/api/v1/admin/test");
+
+        if (!response) {
+            return;
+        }
+
+        const data = await response.text();
+
+        console.log(data);
+    }
+
+    checkAdmin();
+</script>
+
+</body>
+</html>

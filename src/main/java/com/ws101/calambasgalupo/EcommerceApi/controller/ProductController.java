@@ -69,7 +69,7 @@ public class ProductController {
 
     // ===================== CREATE =====================
     @PreAuthorize("isAuthenticated()")
-    @PostMapping
+    @PostMapping("/api/v1/auth/register")
     public ResponseEntity<Product> create(
             @Valid @RequestBody CreateProductDto dto) {
 
