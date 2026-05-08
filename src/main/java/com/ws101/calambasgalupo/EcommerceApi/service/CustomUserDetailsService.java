@@ -1,6 +1,5 @@
 package com.ws101.calambasgalupo.EcommerceApi.service;
 
-// Import your User model from the correct package
 import com.ws101.calambasgalupo.EcommerceApi.model.User;
 import com.ws101.calambasgalupo.EcommerceApi.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,22 +8,23 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CustomUserDetailsService implements UserDetailsService {
+public class CustomUserDetailsService
+        implements UserDetailsService {
 
     private final UserRepository repository;
 
-    // Constructor-based injection (Spring recommended)
     public CustomUserDetailsService(UserRepository repository) {
         this.repository = repository;
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Fetch user from database using UserRepository
-        User user = repository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException {
 
-        // Return the User object - since User implements UserDetails, this is valid
-        return user;
+        return repository.findByUsername(username)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException(
+                                "User not found"
+                        ));
     }
 }
