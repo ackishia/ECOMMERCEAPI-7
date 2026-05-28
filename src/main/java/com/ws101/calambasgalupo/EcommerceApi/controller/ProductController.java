@@ -9,7 +9,9 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,7 +28,7 @@ public class ProductController {
         this.service = service;
     }
 
-    // ===================== GET ALL (DTO RESPONSE) =====================
+    // ===================== GET ALL =====================
     @GetMapping
     public ResponseEntity<List<ProductListingEntry>> getAll() {
 
@@ -38,7 +40,8 @@ public class ProductController {
     // ===================== GET BY ID =====================
     @GetMapping("/{id}")
     public ResponseEntity<Product> getById(
-            @PathVariable Long id) {
+            @PathVariable Long id
+    ) {
 
         return ResponseEntity.ok(
                 service.getProductById(id)
@@ -49,7 +52,8 @@ public class ProductController {
     @GetMapping("/filter")
     public ResponseEntity<List<Product>> filter(
             @RequestParam String filterType,
-            @RequestParam String filterValue) {
+            @RequestParam String filterValue
+    ) {
 
         return ResponseEntity.ok(
                 service.filterProducts(filterType, filterValue)
@@ -60,16 +64,19 @@ public class ProductController {
     @GetMapping("/price-range")
     public ResponseEntity<List<Product>> filterByPriceRange(
             @RequestParam double minPrice,
-            @RequestParam double maxPrice) {
+            @RequestParam double maxPrice
+    ) {
 
         return ResponseEntity.ok(
-                service.filterProductWithPrice(minPrice, maxPrice)
+                service.filterProductWithPrice(
+                        minPrice,
+                        maxPrice
+                )
         );
     }
 
     // ===================== CREATE =====================
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/api/v1/auth/register")
+    @PostMapping
     public ResponseEntity<Product> create(
             @Valid @RequestBody CreateProductDto dto) {
 
@@ -81,23 +88,24 @@ public class ProductController {
     }
 
     // ===================== UPDATE =====================
-    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Product> update(
             @PathVariable Long id,
-            @Valid @RequestBody CreateProductDto dto) {
+            @Valid @RequestBody CreateProductDto dto
+    ) {
 
-        Product updated = service.updateProduct(id, dto);
+        Product updated =
+                service.updateProduct(id, dto);
 
         return ResponseEntity.ok(updated);
     }
 
     // ===================== PATCH =====================
-    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}")
     public ResponseEntity<Product> patch(
             @PathVariable Long id,
-            @RequestBody Map<String, Object> updates) {
+            @RequestBody Map<String, Object> updates
+    ) {
 
         return ResponseEntity.ok(
                 service.patchProduct(id, updates)
@@ -105,10 +113,10 @@ public class ProductController {
     }
 
     // ===================== DELETE =====================
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
-            @PathVariable Long id) {
+            @PathVariable Long id
+    ) {
 
         service.deleteProduct(id);
 

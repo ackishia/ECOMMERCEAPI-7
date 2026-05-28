@@ -1,27 +1,60 @@
 package com.ws101.calambasgalupo.EcommerceApi.controller;
 
-import com.ws101.calambasgalupo.EcommerceApi.dto.RegisterUserDto;
-import com.ws101.calambasgalupo.EcommerceApi.service.UserService;
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
+import com.ws101.calambasgalupo.EcommerceApi.dto.LoginRequest;
+
+import com.ws101.calambasgalupo.EcommerceApi.security.JwtUtil;
+
+import org.springframework.security.authentication.AuthenticationManager;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
+import org.springframework.security.core.Authentication;
+
+import org.springframework.security.core.userdetails.UserDetails;
+
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@CrossOrigin(origins = "http://127.0.0.1:5500")
 public class AuthController {
 
-    private final UserService userService;
+    private final AuthenticationManager authenticationManager;
 
-    public AuthController(UserService userService) {
-        this.userService = userService;
+    private final JwtUtil jwtUtil;
+
+    public AuthController(
+            AuthenticationManager authenticationManager,
+            JwtUtil jwtUtil) {
+
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
     }
 
-    @PostMapping("/api/v1/auth/register")
-    public ResponseEntity<String> registerUser(
-            @Valid @RequestBody RegisterUserDto dto) {
+    @PostMapping("/login")
+    public Map<String, String> login(
+            @RequestBody LoginRequest request) {
 
-        userService.registerUser(dto);
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                request.getUsername(),
+                                request.getPassword()
+                        )
+                );
 
-        return ResponseEntity.ok("User registered successfully!");
+        UserDetails user =
+                (UserDetails) authentication.getPrincipal();
+
+        String token = jwtUtil.generateToken(user);
+
+        Map<String, String> response = new HashMap<>();
+
+        response.put("token", token);
+
+        return response;
     }
 }

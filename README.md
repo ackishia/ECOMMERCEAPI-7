@@ -390,3 +390,256 @@ GET /api/products
 
 
 
+
+# LAB 10
+
+# JWT Authentication in Spring Boot
+
+## Description
+
+This project demonstrates the implementation of JWT (JSON Web Token) Authentication in a Spring Boot application using Spring Security.
+
+The system authenticates users through a login endpoint, generates a JWT token upon successful authentication, and secures protected API endpoints by requiring token-based authorization.
+
+---
+
+## Features
+
+- User login authentication
+- JWT token generation
+- Protected API endpoints
+- Token validation using Spring Security
+- Unauthorized access prevention
+- Stateless authentication using JWT
+
+---
+
+## Technologies Used
+
+- Java 17
+- Spring Boot
+- Spring Security
+- JWT (JJWT 0.11.5)
+- Maven
+- Postman
+
+---
+
+## Dependencies
+
+The following dependencies were used for JWT authentication:
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-api</artifactId>
+    <version>0.11.5</version>
+</dependency>
+
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-impl</artifactId>
+    <version>0.11.5</version>
+    <scope>runtime</scope>
+</dependency>
+
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-jackson</artifactId>
+    <version>0.11.5</version>
+    <scope>runtime</scope>
+</dependency>
+```
+
+---
+
+## JWT Authentication Flow
+
+The authentication process follows these steps:
+
+1. The user logs in using a username and password.
+2. Spring Security validates the user credentials.
+3. A JWT token is generated after successful authentication.
+4. The token is returned to the client.
+5. The client sends the token in the Authorization header for protected requests.
+6. Spring Security validates the JWT token before granting access.
+
+Authorization header format:
+
+```http
+Authorization: Bearer <token>
+```
+
+---
+
+## API Endpoints
+
+### 1. Login Endpoint
+
+**Request**
+
+```http
+POST /api/v1/auth/login
+```
+
+Request Body:
+
+```json
+{
+  "username": "admin",
+  "password": "1234"
+}
+```
+
+Successful Response:
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9..."
+}
+```
+
+---
+
+### 2. Protected Product Endpoint
+
+This endpoint requires JWT authentication.
+
+**Request**
+
+```http
+POST /api/v1/products
+```
+
+Headers:
+
+```http
+Authorization: Bearer <token>
+```
+
+Request Body:
+
+```json
+{
+  "name": "Brown Leather Bag",
+  "description": "Brown Bag",
+  "price": 499,
+  "category": "Bag",
+  "stockQuantity": 5,
+  "imageUrl": "brownleatherbag.jpg"
+}
+```
+
+Successful Response:
+
+```json
+{
+  "name": "Brown Leather Bag",
+  "description": "Brown Bag",
+  "price": 499,
+  "category": "Bag",
+  "stockQuantity": 5,
+  "imageUrl": "brownleatherbag.jpg"
+}
+```
+
+---
+
+## Testing in Postman
+
+### 1. Login Request (JWT Generation)
+
+A successful login request generates a JWT token.
+
+Expected Result:
+
+```http
+200 OK
+```
+
+Example Response:
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9..."
+}
+```
+
+---
+
+### 2. Protected Endpoint Without Token
+
+Attempting to access a protected endpoint without a token returns an unauthorized response.
+
+Expected Result:
+
+```http
+403 Forbidden
+```
+
+---
+
+### 3. Protected Endpoint With Token
+
+Sending a valid JWT token in the Authorization header grants access.
+
+Expected Result:
+
+```http
+200 OK
+```
+
+---
+
+### 4. Invalid JWT Token
+
+Using an invalid or expired token returns an authentication error.
+
+Expected Result:
+
+```http
+401 Unauthorized
+```
+
+---
+
+## Postman Screenshots
+
+### Login Request
+
+![JWTPOST200OKTOKEN.png](SSJWT/JWTPOST200OKTOKEN.png)
+
+
+### Protected Endpoint Without Token
+
+![JWT403FORBIDDENWOTOKEN.png](SSJWT/JWT403FORBIDDENWOTOKEN.png)
+
+### Protected Endpoint With Token
+
+![JWT200OKGET.png](SSJWT/JWT200OKGET.png)
+
+## Project Structure
+
+```text
+src
+├── config
+│   └── SecurityConfig.java
+├── filter
+│   └── JwtAuthenticationFilter.java
+├── service
+│   └── JwtUtil.java
+├── controller
+│   └── AuthController.java
+└── model
+```
+
+---
+
+## Conclusion
+
+This project demonstrates how JWT authentication works in Spring Boot using Spring Security. JWT enables secure and stateless authentication by allowing users to access protected resources through token-based authorization while preventing unauthorized access.

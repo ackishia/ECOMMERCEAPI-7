@@ -1,30 +1,43 @@
 package com.ws101.calambasgalupo.EcommerceApi.service;
 
-import com.ws101.calambasgalupo.EcommerceApi.model.User;
-import com.ws101.calambasgalupo.EcommerceApi.repository.UserRepository;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.stereotype.Service;
 
 @Service
 public class CustomUserDetailsService
         implements UserDetailsService {
 
-    private final UserRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
-    public CustomUserDetailsService(UserRepository repository) {
-        this.repository = repository;
+    public CustomUserDetailsService(
+            PasswordEncoder passwordEncoder
+    ) {
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
-        return repository.findByUsername(username)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException(
-                                "User not found"
-                        ));
+        if (username.equals("admin")) {
+
+            return User.builder()
+                    .username("admin")
+                    .password(
+                            passwordEncoder.encode("1234")
+                    )
+                    .roles("ADMIN")
+                    .build();
+        }
+
+        throw new UsernameNotFoundException(
+                "User not found"
+        );
     }
 }

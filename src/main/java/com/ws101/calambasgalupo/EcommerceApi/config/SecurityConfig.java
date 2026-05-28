@@ -1,92 +1,134 @@
 package com.ws101.calambasgalupo.EcommerceApi.config;
 
+import com.ws101.calambasgalupo.EcommerceApi.security.JwtAuthenticationFilter;
+import com.ws101.calambasgalupo.EcommerceApi.service.CustomUserDetailsService;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import org.springframework.http.HttpMethod;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.http.SessionCreationPolicy;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    // ================= PASSWORD ENCODER =================
+    private final JwtAuthenticationFilter jwtAuthFilter;
+
+    private final CustomUserDetailsService userDetailsService;
+
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthFilter,
+            CustomUserDetailsService userDetailsService
+    ) {
+
+        this.jwtAuthFilter = jwtAuthFilter;
+        this.userDetailsService = userDetailsService;
+    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
+
         return new BCryptPasswordEncoder();
     }
 
-    // ================= TEST USER =================
     @Bean
-    public UserDetailsService userDetailsService() {
+    public AuthenticationProvider authenticationProvider() {
 
-        UserDetails user = User.builder()
-                .username("admin")
-                .password(passwordEncoder().encode("1234"))
-                .roles("USER")
-                .build();
+        DaoAuthenticationProvider authProvider =
+                new DaoAuthenticationProvider();
 
-        return new InMemoryUserDetailsManager(user);
+        authProvider.setUserDetailsService(userDetailsService);
+
+        authProvider.setPasswordEncoder(passwordEncoder());
+
+        return authProvider;
     }
 
-    // ================= SECURITY =================
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config
+    ) throws Exception {
+
+        return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http
+    ) throws Exception {
 
         http
 
-                // ================= CSRF =================
-                .csrf(csrf -> csrf
-                        .csrfTokenRepository(
-                                CookieCsrfTokenRepository.withHttpOnlyFalse()
+                .csrf(csrf -> csrf.disable())
+
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
                         )
                 )
 
-                // ================= AUTHORIZATION =================
                 .authorizeHttpRequests(auth -> auth
 
-                        // PUBLIC LOGIN
-                        .requestMatchers("/login").permitAll()
+                        .requestMatchers(
+                                "/api/v1/auth/**"
+                        ).permitAll()
 
-                        // PUBLIC REGISTER
-                        .requestMatchers("/auth/**").permitAll()
-
-                        // PUBLIC GET PRODUCTS
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/v1/products/**"
                         ).permitAll()
 
-                        // EVERYTHING ELSE NEEDS LOGIN
-                        .anyRequest().authenticated()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/v1/products/**"
+                        ).authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/v1/products/**"
+                        ).authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/api/v1/products/**"
+                        ).authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/v1/products/**"
+                        ).authenticated()
+
+                        .anyRequest()
+                        .authenticated()
                 )
 
-                // ================= FORM LOGIN =================
-                .formLogin(form -> form
-                        .permitAll()
+                .authenticationProvider(
+                        authenticationProvider()
                 )
 
-                // ================= LOGOUT =================
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                        .permitAll()
+                .addFilterBefore(
+                        jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class
                 );
 
         return http.build();
