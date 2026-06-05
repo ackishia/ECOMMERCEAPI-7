@@ -643,3 +643,7 @@ src
 ## Conclusion
 
 This project demonstrates how JWT authentication works in Spring Boot using Spring Security. JWT enables secure and stateless authentication by allowing users to access protected resources through token-based authorization while preventing unauthorized access.
+
+# Author
+• Calambas, Jackielyn C.
+• Galupo, Chris F.
