@@ -646,4 +646,5 @@ This project demonstrates how JWT authentication works in Spring Boot using Spri
 
 # Author
 • Calambas, Jackielyn C.
+
 • Galupo, Chris F.
